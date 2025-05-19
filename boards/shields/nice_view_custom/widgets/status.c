@@ -16,8 +16,12 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/battery_state_changed.h>
+#include <zmk/events/endpoint_changed.h>
 #include <zmk/usb.h>
 #include <zmk/ble.h>
+#include <zmk/endpoints.h>
+
+#include "status.h"
 
 LV_IMG_DECLARE(hammerbeam1);
 LV_IMG_DECLARE(hammerbeam2);
