@@ -208,10 +208,7 @@ ZMK_SUBSCRIPTION(widget_output_status, zmk_usb_conn_state_changed);
 ZMK_SUBSCRIPTION(widget_output_status, zmk_ble_active_profile_changed);
 #endif
 
-static void random_frame_timer_handler(struct k_timer *timer){
-    uint32_t random_idx = sys_rand32_get() % 30;
-    lv_animimg_set_frame(art, random_idx);
-}
+
 
 int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     widget->obj = lv_obj_create(parent);
@@ -228,6 +225,10 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_animimg_set_repeat_count(art, LV_ANIM_REPEAT_INFINITE);
     lv_animimg_start(art);
     */
+    static void random_frame_timer_handler(struct k_timer *timer){
+        uint32_t random_idx = sys_rand32_get() % 30;
+        lv_animimg_set_frame(art, random_idx);
+    }
     lv_animimg_create(art);
     lv_obj_center(art);
     lv_animimg_set_src(art, anim_imgs, 30);
