@@ -56,6 +56,8 @@ LV_IMG_DECLARE(hammerbeam29);
 LV_IMG_DECLARE(hammerbeam30);
 
 struct k_timer slideshow_timer;
+static struct k_work img_update_work;
+static uint32_t next_img_idx;
 const lv_img_dsc_t *anim_imgs[] = {
     &hammerbeam1,
     &hammerbeam2,
@@ -206,6 +208,18 @@ ZMK_SUBSCRIPTION(widget_output_status, zmk_usb_conn_state_changed);
 ZMK_SUBSCRIPTION(widget_output_status, zmk_ble_active_profile_changed);
 #endif
 
+void img_update_cb(void *param) {
+    lv_img_set_src(art, anim_imgs[next_img_idx]);
+}
+
+void img_update_work_handler(struct k_work *work) {
+    lv_async_call(img_update_cb, NULL);
+}
+
+void random_frame_timer_handler(struct k_timer *timer) {
+    next_img_idx = sys_rand32_get() % 30;
+    k_work_submit(&img_update_work);
+}
 
 int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     widget->obj = lv_obj_create(parent);
@@ -226,16 +240,8 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_obj_t * art = lv_img_create(widget->obj);
     lv_obj_center(art);
     lv_img_set_src(art, anim_imgs[0]);
-
-    void rnd_img_update(struct k_timer *timer){
-        uint32_t random_idx = sys_rand32_get() % 30;
-        lv_img_set_src(art, anim_imgs[random_idx]);
-    }
-
-    void random_frame_timer_handler(struct k_timer *timer){
-        lv_async_call(rnd_img_update, NULL); // Schedules img_update_cb to run in the LVGL thread
-    }
-
+ 
+    k_work_init(&img_update_work, img_update_work_handler);
     k_timer_init(&slideshow_timer, random_frame_timer_handler, NULL);
     k_timer_start(&slideshow_timer, K_MSEC(60000), K_MSEC(60000));
     
