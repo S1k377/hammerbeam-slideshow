@@ -236,3 +236,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
 
     return 0;
 }
+
+lv_obj_t *zmk_widget_status_obj(struct zmk_widget_status *widget) {
+    return widget->obj;
+}
