@@ -92,6 +92,20 @@ const lv_img_dsc_t *anim_imgs[] = {
     &hammerbeam30,
 };
 
+void img_update_cb(void *param) {
+    lv_img_set_src(art, anim_imgs[next_img_idx]);
+}
+
+void img_update_work_handler(struct k_work *work) {
+    lv_async_call(img_update_cb, NULL);
+}
+
+void random_frame_timer_handler(struct k_timer *timer) {
+    next_img_idx = sys_rand32_get() % 30;
+    k_work_submit(&img_update_work);
+}
+    
+
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
 struct output_status_state {
@@ -228,19 +242,6 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
 
 
     art = lv_img_create(widget->obj);
-    void img_update_cb(void *param) {
-        lv_img_set_src(art, anim_imgs[next_img_idx]);
-    }
-
-    void img_update_work_handler(struct k_work *work) {
-        lv_async_call(img_update_cb, NULL);
-    }
-
-    void random_frame_timer_handler(struct k_timer *timer) {
-        next_img_idx = sys_rand32_get() % 30;
-        k_work_submit(&img_update_work);
-    }
-    
     lv_obj_center(art);
     lv_img_set_src(art, anim_imgs[0]);
  
