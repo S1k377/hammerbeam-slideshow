@@ -85,18 +85,6 @@ const lv_img_dsc_t *anim_imgs[] =  {
     &hammerbeam30,
 };
 
-struct zmk_widget_status {
-    sys_snode_t node;
-    lv_obj_t *obj;
-    lv_color_t cbuf[CANVAS_SIZE * CANVAS_SIZE];
-    struct status_state state;
-
-    lv_obj_t *art;
-    struct k_work img_update_work;
-    struct k_timer slideshow_timer;
-    uint32_t next_img_idx;
-};
-
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
 struct output_status_state {
