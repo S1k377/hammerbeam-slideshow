@@ -56,6 +56,7 @@ LV_IMG_DECLARE(hammerbeam29);
 LV_IMG_DECLARE(hammerbeam30);
 
 static lv_obj_t *art;
+static struct k_timer slideshow_timer;
 const lv_img_dsc_t *anim_imgs[] = {
     &hammerbeam1,
     &hammerbeam2,
