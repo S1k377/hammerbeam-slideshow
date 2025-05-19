@@ -1,10 +1,3 @@
-/*
- *
- * Copyright (c) 2023 The ZMK Contributors
- * SPDX-License-Identifier: MIT
- *
- */
-
 #include <zephyr/kernel.h>
 #include <zephyr/random/random.h>
 
@@ -55,11 +48,11 @@ LV_IMG_DECLARE(hammerbeam28);
 LV_IMG_DECLARE(hammerbeam29);
 LV_IMG_DECLARE(hammerbeam30);
 
-struct k_timer slideshow_timer;
-static struct k_work img_update_work;
-static uint32_t next_img_idx;
-static lv_obj_t *art;
-const lv_img_dsc_t *anim_imgs[] = {
+
+
+static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
+
+const lv_img_dsc_t *anim_imgs[] =  {
     &hammerbeam1,
     &hammerbeam2,
     &hammerbeam3,
@@ -92,19 +85,17 @@ const lv_img_dsc_t *anim_imgs[] = {
     &hammerbeam30,
 };
 
-void img_update_cb(void *param) {
-    lv_img_set_src(art, anim_imgs[next_img_idx]);
-}
+struct zmk_widget_status {
+    sys_snode_t node;
+    lv_obj_t *obj;
+    lv_color_t cbuf[CANVAS_SIZE * CANVAS_SIZE];
+    struct status_state state;
 
-void img_update_work_handler(struct k_work *work) {
-    lv_async_call(img_update_cb, NULL);
-}
-
-void random_frame_timer_handler(struct k_timer *timer) {
-    next_img_idx = sys_rand32_get() % 30;
-    k_work_submit(&img_update_work);
-}
-    
+    lv_obj_t *art;
+    struct k_work img_update_work;
+    struct k_timer slideshow_timer;
+    uint32_t next_img_idx;
+};
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
@@ -223,40 +214,41 @@ ZMK_SUBSCRIPTION(widget_output_status, zmk_usb_conn_state_changed);
 ZMK_SUBSCRIPTION(widget_output_status, zmk_ble_active_profile_changed);
 #endif
 
+static void img_update_cb(void *param) {
+    struct zmk_widget_status *widget = param;
+    lv_img_set_src(widget->art, anim_imgs[widget->next_img_idx]);
+}
+
+static void img_update_work_handler(struct k_work *work) {
+    struct zmk_widget_status *widget = CONTAINER_OF(work, struct zmk_widget_status, img_update_work);
+    lv_async_call(img_update_cb, widget);
+}
+
+static void random_frame_timer_handler(struct k_timer *timer) {
+    struct zmk_widget_status *widget = CONTAINER_OF(timer, struct zmk_widget_status, slideshow_timer);
+    widget->next_img_idx = sys_rand32_get() % 30;
+    k_work_submit(&widget->img_update_work);
+}
+
 int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     widget->obj = lv_obj_create(parent);
     lv_obj_set_size(widget->obj, 160, 68);
     lv_obj_t *top = lv_canvas_create(widget->obj);
     lv_obj_align(top, LV_ALIGN_TOP_RIGHT, 0, 0);
     lv_canvas_set_buffer(top, widget->cbuf, CANVAS_SIZE, CANVAS_SIZE, LV_IMG_CF_TRUE_COLOR);
-    
-    
-    /*lv_obj_t * art = lv_animimg_create(widget->obj);
-    lv_obj_center(art);
-    lv_animimg_set_src(art, (const void **) anim_imgs, 30);
-    lv_animimg_set_duration(art, CONFIG_CUSTOM_ANIMATION_SPEED);
-    lv_animimg_set_repeat_count(art, LV_ANIM_REPEAT_INFINITE);
-    lv_animimg_start(art);
-    */
 
+    widget->art = lv_img_create(widget->obj);
+    lv_obj_center(widget->art);
+    lv_img_set_src(widget->art, anim_imgs[0]);
+    lv_obj_align(widget->art, LV_ALIGN_TOP_LEFT, 0, 0);
 
+    k_work_init(&widget->img_update_work, img_update_work_handler);
+    k_timer_init(&widget->slideshow_timer, random_frame_timer_handler, NULL);
+    k_timer_start(&widget->slideshow_timer, K_MSEC(60000), K_MSEC(60000));
 
-    art = lv_img_create(widget->obj);
-    lv_obj_center(art);
-    lv_img_set_src(art, anim_imgs[0]);
- 
-    k_work_init(&img_update_work, img_update_work_handler);
-    k_timer_init(&slideshow_timer, random_frame_timer_handler, NULL);
-    k_timer_start(&slideshow_timer, K_MSEC(60000), K_MSEC(60000));
-    
-
-    lv_obj_align(art, LV_ALIGN_TOP_LEFT, 0, 0);
     sys_slist_append(&widgets, &widget->node);
     widget_battery_status_init();
     widget_output_status_init();
 
-
     return 0;
 }
-
-lv_obj_t *zmk_widget_status_obj(struct zmk_widget_status *widget) { return widget->obj; }
