@@ -228,9 +228,13 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_obj_center(art);
     lv_img_set_src(art, anim_imgs[0]);
 
-    void random_frame_timer_handler(struct k_timer *timer){
+    void rnd_img_update(struct k_timer *timer){
         uint32_t random_idx = sys_rand32_get() % 30;
         lv_img_set_src(art, anim_imgs[random_idx]);
+    }
+
+    void random_frame_timer_handler(struct k_timer *timer){
+        lv_async_call(rnd_img_update, NULL); // Schedules img_update_cb to run in the LVGL thread
     }
 
     k_timer_init(&slideshow_timer, random_frame_timer_handler, NULL);
