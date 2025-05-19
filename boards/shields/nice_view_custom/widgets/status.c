@@ -225,16 +225,13 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_animimg_set_repeat_count(art, LV_ANIM_REPEAT_INFINITE);
     lv_animimg_start(art);
     */
-    static void random_frame_timer_handler(struct k_timer *timer){
-        uint32_t random_idx = sys_rand32_get() % 30;
-        lv_animimg_set_frame(art, random_idx);
-    }
+   
     lv_animimg_create(art);
     lv_obj_center(art);
     lv_animimg_set_src(art, anim_imgs, 30);
     lv_animimg_set_frame(art, 0); // Show the first frame initially
 
-    k_timer_init(&slideshow_timer, random_frame_timer_handler, NULL);
+    k_timer_init(&slideshow_timer, lv_animimg_set_frame(art, sys_rand32_get() % 30), NULL);
     k_timer_start(&slideshow_timer, K_MSEC(60000), K_MSEC(60000));
 
 
