@@ -86,6 +86,13 @@ const lv_img_dsc_t *anim_imgs[] = {
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
+struct output_status_state {
+    struct zmk_endpoint_instance selected_endpoint;
+    int active_profile_index;
+    bool active_profile_connected;
+    bool active_profile_bonded;
+};
+
 static void draw_top(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
 
