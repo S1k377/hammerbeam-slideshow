@@ -224,6 +224,9 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_animimg_start(art);
     */
 
+
+
+    lv_obj_t * art = lv_img_create(widget->obj);
     void img_update_cb(void *param) {
         lv_img_set_src(art, anim_imgs[next_img_idx]);
     }
@@ -236,8 +239,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
         next_img_idx = sys_rand32_get() % 30;
         k_work_submit(&img_update_work);
     }
-
-    lv_obj_t * art = lv_img_create(widget->obj);
+    
     lv_obj_center(art);
     lv_img_set_src(art, anim_imgs[0]);
  
