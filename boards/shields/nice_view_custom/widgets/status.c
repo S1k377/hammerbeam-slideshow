@@ -228,7 +228,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_obj_center(art);
     lv_img_set_src(art, anim_imgs[0]);
 
-    static void random_frame_timer_handler(struct k_timer *timer){
+    void random_frame_timer_handler(struct k_timer *timer){
         uint32_t random_idx = sys_rand32_get() % 30;
         lv_img_set_src(art, anim_imgs[random_idx]);
     }
