@@ -55,7 +55,7 @@ LV_IMG_DECLARE(hammerbeam28);
 LV_IMG_DECLARE(hammerbeam29);
 LV_IMG_DECLARE(hammerbeam30);
 
-static const lv_img_dsc_t *anim_imgs[] = {
+const lv_img_dsc_t *anim_imgs[] = {
     &hammerbeam1,
     &hammerbeam2,
     &hammerbeam3,
@@ -242,7 +242,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
  
     k_work_init(&widget->img_update_work, img_update_work_handler);
     k_timer_init(&widget->slideshow_timer, random_frame_timer_handler, NULL);
-    k_timer_user_data_set(&widget->slideshow_timer, widget);
+    k_timer_user_data_set(&widget->slideshow_timer, *widget);
     k_timer_start(&widget->slideshow_timer, K_MSEC(60000), K_MSEC(60000));
     
 
