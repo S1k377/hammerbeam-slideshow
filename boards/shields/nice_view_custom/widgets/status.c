@@ -55,8 +55,39 @@ LV_IMG_DECLARE(hammerbeam28);
 LV_IMG_DECLARE(hammerbeam29);
 LV_IMG_DECLARE(hammerbeam30);
 
-
-
+struct k_timer slideshow_timer;
+const lv_img_dsc_t *anim_imgs[] = {
+    &hammerbeam1,
+    &hammerbeam2,
+    &hammerbeam3,
+    &hammerbeam4,
+    &hammerbeam5,
+    &hammerbeam6,
+    &hammerbeam7,
+    &hammerbeam8,
+    &hammerbeam9,
+    &hammerbeam10,
+    &hammerbeam11,
+    &hammerbeam12,
+    &hammerbeam13,
+    &hammerbeam14,
+    &hammerbeam15,
+    &hammerbeam16,
+    &hammerbeam17,
+    &hammerbeam18,
+    &hammerbeam19,
+    &hammerbeam20,
+    &hammerbeam21,
+    &hammerbeam22,
+    &hammerbeam23,
+    &hammerbeam24,
+    &hammerbeam25,
+    &hammerbeam26,
+    &hammerbeam27,
+    &hammerbeam28,
+    &hammerbeam29,
+    &hammerbeam30,
+};
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
@@ -192,40 +223,6 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_animimg_start(art);
     */
 
-    static lv_obj_t *art;
-static struct k_timer slideshow_timer;
-const lv_img_dsc_t *anim_imgs[] = {
-    &hammerbeam1,
-    &hammerbeam2,
-    &hammerbeam3,
-    &hammerbeam4,
-    &hammerbeam5,
-    &hammerbeam6,
-    &hammerbeam7,
-    &hammerbeam8,
-    &hammerbeam9,
-    &hammerbeam10,
-    &hammerbeam11,
-    &hammerbeam12,
-    &hammerbeam13,
-    &hammerbeam14,
-    &hammerbeam15,
-    &hammerbeam16,
-    &hammerbeam17,
-    &hammerbeam18,
-    &hammerbeam19,
-    &hammerbeam20,
-    &hammerbeam21,
-    &hammerbeam22,
-    &hammerbeam23,
-    &hammerbeam24,
-    &hammerbeam25,
-    &hammerbeam26,
-    &hammerbeam27,
-    &hammerbeam28,
-    &hammerbeam29,
-    &hammerbeam30,
-};
     lv_obj_t * art = lv_img_create(widget->obj);
     lv_obj_center(art);
     lv_img_set_src(art, anim_imgs[0]);
