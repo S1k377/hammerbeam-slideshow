@@ -206,20 +206,36 @@ ZMK_SUBSCRIPTION(widget_output_status, zmk_usb_conn_state_changed);
 ZMK_SUBSCRIPTION(widget_output_status, zmk_ble_active_profile_changed);
 #endif
 
+static void random_frame_timer_handler(struct k_timer *timer){
+    uint32_t random_idx = sys_rand32_get() % 30;
+    lv_animimg_set_frame(art, random_idx);
+}
+
 int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     widget->obj = lv_obj_create(parent);
     lv_obj_set_size(widget->obj, 160, 68);
     lv_obj_t *top = lv_canvas_create(widget->obj);
     lv_obj_align(top, LV_ALIGN_TOP_RIGHT, 0, 0);
     lv_canvas_set_buffer(top, widget->cbuf, CANVAS_SIZE, CANVAS_SIZE, LV_IMG_CF_TRUE_COLOR);
-
-    lv_obj_t * art = lv_animimg_create(widget->obj);
+    
+    
+    /*lv_obj_t * art = lv_animimg_create(widget->obj);
     lv_obj_center(art);
     lv_animimg_set_src(art, (const void **) anim_imgs, 30);
     lv_animimg_set_duration(art, CONFIG_CUSTOM_ANIMATION_SPEED);
     lv_animimg_set_repeat_count(art, LV_ANIM_REPEAT_INFINITE);
     lv_animimg_start(art);
-    
+    */
+    lv_animimg_create(art);
+    lv_obj_center(art);
+    lv_animimg_set_src(art, anim_imgs, 30);
+    lv_animimg_set_frame(art, 0); // Show the first frame initially
+
+    k_timer_init(&slideshow_timer, random_frame_timer_handler, NULL);
+    k_timer_start(&slideshow_timer, K_MSEC(60000), K_MSEC(60000));
+
+
+
     lv_obj_align(art, LV_ALIGN_TOP_LEFT, 0, 0);
     sys_slist_append(&widgets, &widget->node);
     widget_battery_status_init();
