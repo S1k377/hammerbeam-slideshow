@@ -225,7 +225,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_animimg_set_repeat_count(art, LV_ANIM_REPEAT_INFINITE);
     lv_animimg_start(art);
     */
-    lv_obj_t * art = lv_animimg_create(widget->obj)
+    lv_obj_t * art = lv_animimg_create(widget->obj);
     lv_animimg_create(art);
     lv_obj_center(art);
     lv_animimg_set_src(art, anim_imgs, 30);
