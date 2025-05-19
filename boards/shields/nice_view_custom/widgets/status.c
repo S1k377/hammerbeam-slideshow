@@ -229,9 +229,9 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_animimg_create(art);
     lv_obj_center(art);
     lv_animimg_set_src(art, anim_imgs, 30);
-    lv_animimg_set_src(art, 0); // Show the first frame initially
+    lv_animimg_set_frame(art, 0); // Show the first frame initially
 
-    k_timer_init(&slideshow_timer, lv_animimg_set_src(art, sys_rand32_get() % 30), NULL);
+    k_timer_init(&slideshow_timer, lv_animimg_set_frame(art, sys_rand32_get() % 30), NULL);
     k_timer_start(&slideshow_timer, K_MSEC(60000), K_MSEC(60000));
 
 
