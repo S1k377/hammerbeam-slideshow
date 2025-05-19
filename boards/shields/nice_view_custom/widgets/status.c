@@ -55,6 +55,7 @@ LV_IMG_DECLARE(hammerbeam28);
 LV_IMG_DECLARE(hammerbeam29);
 LV_IMG_DECLARE(hammerbeam30);
 
+static lv_obj_t *art;
 const lv_img_dsc_t *anim_imgs[] = {
     &hammerbeam1,
     &hammerbeam2,
