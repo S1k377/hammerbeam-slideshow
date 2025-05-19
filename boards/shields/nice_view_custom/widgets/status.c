@@ -88,41 +88,14 @@ const lv_img_dsc_t *anim_imgs[] = {
     &hammerbeam30,
 };
 
-static void img_update_cb(void *param) {
-    struct zmk_widget_status *widget = param;
-    
-    if (widget == NULL || widget->art == NULL) {
-        // Log error or handle the case when widget is NULL
-        return;
-    }
-    
-    uint32_t idx = widget->next_img_idx;
-    if (idx < ARRAY_SIZE(anim_imgs) && anim_imgs[idx] != NULL) {
-        lv_img_set_src(widget->art, anim_imgs[idx]);
-    }
-}
-
-static void img_update_work_handler(struct k_work *work) {
-    struct zmk_widget_status *widget = CONTAINER_OF(work, struct zmk_widget_status, img_update_work);
-    lv_async_call(img_update_cb, widget);
-}
-
-static void random_frame_timer_handler(struct k_timer *timer) {
-    struct zmk_widget_status *widget = (struct zmk_widget_status *)k_timer_user_data_get(timer);
-    
-    if (widget == NULL) {
-        // Log error or handle the case when widget is NULL
-        return;
-    }
-    
-    uint32_t array_size = ARRAY_SIZE(anim_imgs);
-    if (array_size > 0) {
-        widget->next_img_idx = sys_rand32_get() % array_size;
-        // Ensure index is in bounds even after modulo
-        if (widget->next_img_idx >= array_size) {
-            widget->next_img_idx = 0;
+void shuffle_imgs(const lv_img_dsc_t **array, size_t n) {
+    if (n > 1) {
+        for (size_t i = n - 1; i > 0; i--) {
+            size_t j = sys_rand32_get() % (i + 1);
+            const lv_img_dsc_t *tmp = array[j];
+            array[j] = array[i];
+            array[i] = tmp;
         }
-        k_work_submit(&widget->img_update_work);
     }
 }
 
@@ -248,27 +221,15 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_obj_set_size(widget->obj, 160, 68);
     lv_obj_t *top = lv_canvas_create(widget->obj);
     lv_obj_align(top, LV_ALIGN_TOP_RIGHT, 0, 0);
-    lv_canvas_set_buffer(top, widget->cbuf, CANVAS_SIZE, CANVAS_SIZE, LV_IMG_CF_TRUE_COLOR);
+    lv_canvas_set_buffer(top, widget->cbuf, CANVAS_SIZE, CANVAS_SIZE, LV_IMG_CF_TRUE_COLOR);    
     
-    // Initialize next_img_idx to 0
-    widget->next_img_idx = 0;
-    
-    /*lv_obj_t * art = lv_animimg_create(widget->obj);
+    shuffle_imgs(anim_imgs, ARRAY_SIZE(anim_imgs));
+    lv_obj_t * art = lv_animimg_create(widget->obj);
     lv_obj_center(art);
     lv_animimg_set_src(art, (const void **) anim_imgs, 30);
     lv_animimg_set_duration(art, CONFIG_CUSTOM_ANIMATION_SPEED);
     lv_animimg_set_repeat_count(art, LV_ANIM_REPEAT_INFINITE);
     lv_animimg_start(art);
-    */
-
-    widget->art = lv_img_create(widget->obj);
-    lv_obj_center(widget->art);
-    lv_img_set_src(widget->art, anim_imgs[0]);
- 
-    k_work_init(&widget->img_update_work, img_update_work_handler);
-    k_timer_init(&widget->slideshow_timer, random_frame_timer_handler, NULL);
-    k_timer_user_data_set(&widget->slideshow_timer, widget); // Pass the pointer, not the address of the pointer
-    k_timer_start(&widget->slideshow_timer, K_MSEC(60000), K_MSEC(60000));
     
 
     lv_obj_align(widget->art, LV_ALIGN_TOP_LEFT, 0, 0);
