@@ -87,6 +87,17 @@ const lv_img_dsc_t *anim_imgs[] = {
     &hammerbeam30,
 };
 
+void shuffle_imgs(const lv_img_dsc_t **array, size_t n) {
+    if (n > 1) {
+        for (size_t i = n - 1; i > 0; i--) {
+            size_t j = sys_rand32_get() % (i + 1);
+            const lv_img_dsc_t *tmp = array[j];
+            array[j] = array[i];
+            array[i] = tmp;
+        }
+    }
+}
+
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
@@ -176,6 +187,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_obj_align(top, LV_ALIGN_TOP_RIGHT, 0, 0);
     lv_canvas_set_buffer(top, widget->cbuf, CANVAS_SIZE, CANVAS_SIZE, LV_IMG_CF_TRUE_COLOR);
 
+    shuffle_imgs(anim_imgs, ARRAY_SIZE(anim_imgs));
     lv_obj_t * art = lv_animimg_create(widget->obj);
     lv_obj_center(art);
     lv_animimg_set_src(art, (const void **) anim_imgs, 30);
