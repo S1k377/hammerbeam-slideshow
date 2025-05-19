@@ -55,6 +55,39 @@ LV_IMG_DECLARE(hammerbeam28);
 LV_IMG_DECLARE(hammerbeam29);
 LV_IMG_DECLARE(hammerbeam30);
 
+static const lv_img_dsc_t *anim_imgs[] = {
+    &hammerbeam1,
+    &hammerbeam2,
+    &hammerbeam3,
+    &hammerbeam4,
+    &hammerbeam5,
+    &hammerbeam6,
+    &hammerbeam7,
+    &hammerbeam8,
+    &hammerbeam9,
+    &hammerbeam10,
+    &hammerbeam11,
+    &hammerbeam12,
+    &hammerbeam13,
+    &hammerbeam14,
+    &hammerbeam15,
+    &hammerbeam16,
+    &hammerbeam17,
+    &hammerbeam18,
+    &hammerbeam19,
+    &hammerbeam20,
+    &hammerbeam21,
+    &hammerbeam22,
+    &hammerbeam23,
+    &hammerbeam24,
+    &hammerbeam25,
+    &hammerbeam26,
+    &hammerbeam27,
+    &hammerbeam28,
+    &hammerbeam29,
+    &hammerbeam30,
+};
+
 static void img_update_cb(void *param) {
     struct zmk_widget_status *widget = param;
     lv_img_set_src(widget->art, anim_imgs[widget->next_img_idx]);
@@ -193,42 +226,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_obj_set_size(widget->obj, 160, 68);
     lv_obj_t *top = lv_canvas_create(widget->obj);
     lv_obj_align(top, LV_ALIGN_TOP_RIGHT, 0, 0);
-    lv_canvas_set_buffer(top, widget->cbuf, CANVAS_SIZE, CANVAS_SIZE, LV_IMG_CF_TRUE_COLOR);
-
-    const lv_img_dsc_t *anim_imgs[] = {
-    &hammerbeam1,
-    &hammerbeam2,
-    &hammerbeam3,
-    &hammerbeam4,
-    &hammerbeam5,
-    &hammerbeam6,
-    &hammerbeam7,
-    &hammerbeam8,
-    &hammerbeam9,
-    &hammerbeam10,
-    &hammerbeam11,
-    &hammerbeam12,
-    &hammerbeam13,
-    &hammerbeam14,
-    &hammerbeam15,
-    &hammerbeam16,
-    &hammerbeam17,
-    &hammerbeam18,
-    &hammerbeam19,
-    &hammerbeam20,
-    &hammerbeam21,
-    &hammerbeam22,
-    &hammerbeam23,
-    &hammerbeam24,
-    &hammerbeam25,
-    &hammerbeam26,
-    &hammerbeam27,
-    &hammerbeam28,
-    &hammerbeam29,
-    &hammerbeam30,
-};
-
-    
+    lv_canvas_set_buffer(top, widget->cbuf, CANVAS_SIZE, CANVAS_SIZE, LV_IMG_CF_TRUE_COLOR);    
     
     /*lv_obj_t * art = lv_animimg_create(widget->obj);
     lv_obj_center(art);
