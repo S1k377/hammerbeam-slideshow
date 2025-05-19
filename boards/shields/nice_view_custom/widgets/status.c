@@ -58,6 +58,7 @@ LV_IMG_DECLARE(hammerbeam30);
 struct k_timer slideshow_timer;
 static struct k_work img_update_work;
 static uint32_t next_img_idx;
+static lv_obj_t *art;
 const lv_img_dsc_t *anim_imgs[] = {
     &hammerbeam1,
     &hammerbeam2,
@@ -226,7 +227,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
 
 
 
-    lv_obj_t * art = lv_img_create(widget->obj);
+    art = lv_img_create(widget->obj);
     void img_update_cb(void *param) {
         lv_img_set_src(art, anim_imgs[next_img_idx]);
     }
