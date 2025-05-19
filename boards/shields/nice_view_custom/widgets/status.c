@@ -16,12 +16,8 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/battery_state_changed.h>
-#include <zmk/split/bluetooth/peripheral.h>
-#include <zmk/events/split_peripheral_status_changed.h>
 #include <zmk/usb.h>
 #include <zmk/ble.h>
-
-#include "peripheral_status.h"
 
 LV_IMG_DECLARE(hammerbeam1);
 LV_IMG_DECLARE(hammerbeam2);
@@ -89,10 +85,6 @@ const lv_img_dsc_t *anim_imgs[] = {
 
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
-
-struct peripheral_status_state {
-    bool connected;
-};
 
 static void draw_top(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
@@ -167,25 +159,49 @@ ZMK_SUBSCRIPTION(widget_battery_status, zmk_battery_state_changed);
 ZMK_SUBSCRIPTION(widget_battery_status, zmk_usb_conn_state_changed);
 #endif /* IS_ENABLED(CONFIG_USB_DEVICE_STACK) */
 
-static struct peripheral_status_state get_state(const zmk_event_t *_eh) {
-    return (struct peripheral_status_state){.connected = zmk_split_bt_peripheral_is_connected()};
-}
+ZMK_DISPLAY_WIDGET_LISTENER(widget_battery_status, struct battery_status_state,
+                            battery_status_update_cb, battery_status_get_state)
 
-static void set_connection_status(struct zmk_widget_status *widget,
-                                  struct peripheral_status_state state) {
-    widget->state.connected = state.connected;
+ZMK_SUBSCRIPTION(widget_battery_status, zmk_battery_state_changed);
+#if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
+ZMK_SUBSCRIPTION(widget_battery_status, zmk_usb_conn_state_changed);
+#endif /* IS_ENABLED(CONFIG_USB_DEVICE_STACK) */
+
+static void set_output_status(struct zmk_widget_status *widget,
+                              const struct output_status_state *state) {
+    widget->state.selected_endpoint = state->selected_endpoint;
+    widget->state.active_profile_index = state->active_profile_index;
+    widget->state.active_profile_connected = state->active_profile_connected;
+    widget->state.active_profile_bonded = state->active_profile_bonded;
 
     draw_top(widget->obj, widget->cbuf, &widget->state);
+    draw_middle(widget->obj, widget->cbuf2, &widget->state);
 }
 
-static void output_status_update_cb(struct peripheral_status_state state) {
+static void output_status_update_cb(struct output_status_state state) {
     struct zmk_widget_status *widget;
-    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_connection_status(widget, state); }
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_output_status(widget, &state); }
 }
 
-ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_status, struct peripheral_status_state,
-                            output_status_update_cb, get_state)
-ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
+static struct output_status_state output_status_get_state(const zmk_event_t *_eh) {
+    return (struct output_status_state){
+        .selected_endpoint = zmk_endpoints_selected(),
+        .active_profile_index = zmk_ble_active_profile_index(),
+        .active_profile_connected = zmk_ble_active_profile_is_connected(),
+        .active_profile_bonded = !zmk_ble_active_profile_is_open(),
+    };
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_output_status, struct output_status_state,
+                            output_status_update_cb, output_status_get_state)
+ZMK_SUBSCRIPTION(widget_output_status, zmk_endpoint_changed);
+
+#if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
+ZMK_SUBSCRIPTION(widget_output_status, zmk_usb_conn_state_changed);
+#endif
+#if defined(CONFIG_ZMK_BLE)
+ZMK_SUBSCRIPTION(widget_output_status, zmk_ble_active_profile_changed);
+#endif
 
 int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     widget->obj = lv_obj_create(parent);
@@ -204,7 +220,6 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_obj_align(art, LV_ALIGN_TOP_LEFT, 0, 0);
     sys_slist_append(&widgets, &widget->node);
     widget_battery_status_init();
-    widget_peripheral_status_init();
 
     return 0;
 }
