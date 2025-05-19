@@ -247,7 +247,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     k_timer_start(&widget->slideshow_timer, K_MSEC(60000), K_MSEC(60000));
     
 
-    lv_obj_align(art, LV_ALIGN_TOP_LEFT, 0, 0);
+    lv_obj_align(widget->art, LV_ALIGN_TOP_LEFT, 0, 0);
     sys_slist_append(&widgets, &widget->node);
     widget_battery_status_init();
     widget_output_status_init();
