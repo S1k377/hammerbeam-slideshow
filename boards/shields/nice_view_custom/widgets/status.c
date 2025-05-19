@@ -89,18 +89,20 @@ const lv_img_dsc_t *anim_imgs[] = {
 };
 
 static void img_update_cb(void *param) {
-    lv_img_set_src(art, anim_imgs[next_img_idx]);
+    struct zmk_widget_status *widget = param;
+    lv_img_set_src(widget->art, anim_imgs[widget->next_img_idx]);
 }
 
 static void img_update_work_handler(struct k_work *work) {
-    lv_async_call(img_update_cb, NULL);
+    struct zmk_widget_status *widget = CONTAINER_OF(work, struct zmk_widget_status, img_update_work);
+    lv_async_call(img_update_cb, widget);
 }
 
 static void random_frame_timer_handler(struct k_timer *timer) {
-    next_img_idx = sys_rand32_get() % 30;
-    k_work_submit(&img_update_work);
-}
-    
+    struct zmk_widget_status *widget = k_timer_user_data_get(timer);
+    widget->next_img_idx = sys_rand32_get() % ARRAY_SIZE(anim_imgs);
+    k_work_submit(&widget->img_update_work);
+}   
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
@@ -235,13 +237,14 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_animimg_start(art);
     */
 
-    art = lv_img_create(widget->obj);
-    lv_obj_center(art);
-    lv_img_set_src(art, anim_imgs[0]);
+    widget->art = lv_img_create(widget->obj);
+    lv_obj_center(widget->art);
+    lv_img_set_src(widget->art, anim_imgs[0]);
  
-    k_work_init(&img_update_work, img_update_work_handler);
-    k_timer_init(&slideshow_timer, random_frame_timer_handler, NULL);
-    k_timer_start(&slideshow_timer, K_MSEC(60000), K_MSEC(60000));
+    k_work_init(&widget->img_update_work, img_update_work_handler);
+    k_timer_init(&widget->slideshow_timer, random_frame_timer_handler, NULL);
+    k_timer_user_data_set(&widget->slideshow_timer, widget);
+    k_timer_start(&widget->slideshow_timer, K_MSEC(60000), K_MSEC(60000));
     
 
     lv_obj_align(art, LV_ALIGN_TOP_LEFT, 0, 0);
